@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{# 页面标题 #}
+{% block title %}
+    我的网站|博客
+{% endblock %}
+
+{% load staticfiles %}
+{% block head_extends %}
+    <link rel="stylesheet" href="{% static 'blog/css/blog.css' %}">
+{% endblock %}
+
+{% block blog_list_active %}active{% endblock %}
+
+{# 页面内容 #}
+{% block content %}
+    <div class="row">
+        <div class="col-12 col-sm-8 col-md-9 col-lg-10">
+            <div class="card">
+                <div class="card-header">{% block blog_list_title %}博客列表（一共有{{ page_of_blogs.paginator.count }}篇博客）{% endblock %}</div>
+                <div class="card-body">
+                    {% for blog in page_of_blogs.object_list %}
+                        <div class="blog">
+                            <a href="{% url 'blog_detail' blog.pk %}">
+                               <h3>{{ blog.title }}</h3>
+                            </a>
+                            <p class="blog-info">
+                                <i class="fas fa-tag"></i><a href="{% url 'blogs_with_type' blog.blog_type.pk %}">{{ blog.blog_type }}</a>
+                                <i class="far fa-clock"></i>{{ blog.created_time|date:"Y-m-d" }}
+                            </p>
+                            <p>{{ blog.content|truncatechars:200 }}</p>
+                        </div>
+                    {% empty %}
+                        <div class="blog">
+                           <p>暂无博客</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <nav class="Page navigation example">
+                <ul class="pagination justify-content-end">
+                    {% if page_of_blogs.has_previous %}
+                        <li class="page-item">
+                            <a href="?page={{ page_of_blogs.previous_page_number }}" class="page-link" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                                <span class="sr-only">Previous</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                                <span class="sr-only">Previous</span>
+                            </span>
+                        </li>
+                    {% endif %}
+
+                    {% for page_num in paginator_list %}
+                        {% if page_of_blogs.number == page_num %}
+                            <li class="page-item active">
+                                <span class="page-link">
+                                    {{ page_num }}
+                                    <span class="sr-only">(current)</span>
+                                </span>
+                            </li>
+                        {% elif page_num == '···' %}
+                            <li class="page-item disabled">
+                                <span class="page-link">
+                                    {{ page_num }}
+                                </span>
+                            </li>
+                        {% else %}
+                            <li class="page-item">
+                                <a href="?page={{ page_num }}" class="page-link">{{ page_num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_of_blogs.has_next %}
+                        <li class="page-item">
+                            <a href="?page={{ page_of_blogs.next_page_number }}" class="page-link" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                                <span class="sr-only">Next</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                                <span class="sr-only">Next</span>
+                            </span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        <div class="d-none d-sm-block col-sm-4 col-md-3 col-lg-2">
+            <div class="card">
+                <div class="card-header">博客分类</div>
+                <div class="card-body">
+                    <ul class="blog-types">
+                        {% for blog_type in blog_types %}
+                            <li><a href="{% url 'blogs_with_type' blog_type.pk %}">{{ blog_type.type_name }}</a></li>
+                        {% empty %}
+                            <li>暂无分类</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
